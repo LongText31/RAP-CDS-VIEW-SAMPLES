@@ -1,0 +1,62 @@
+=========================================================================
+C view that consumes I view where we by standard, describe new Value Help 
+=========================================================================
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'BdgtPerCont Process Type Value Help'
+@Metadata.ignorePropagatedAnnotations: true
+@ObjectModel.dataCategory: #VALUE_HELP
+@ObjectModel.resultSet.sizeCategory: #XS
+@ObjectModel.usageType.dataClass: #MASTER
+@ObjectModel.usageType.serviceQuality: #B
+@ObjectModel.usageType.sizeCategory: #S
+@Search.searchable: true
+@VDM.viewType: #CONSUMPTION
+@Consumption.ranked:true
+
+
+define view entity C_BdgtPeriodContProcessTypeVH
+  as select from I_BdgtPerContProcessTypeText
+{
+         @ObjectModel.text.element:  [ 'BudgetProcessTypeText' ]
+         @UI.textArrangement: #TEXT_ONLY
+  key    BudgetProcessType,
+         @UI.hidden: true
+  key    Language,
+         @Semantics.text: true
+         @Search: { defaultSearchElement: true, ranking: #HIGH, fuzzinessThreshold: 0.8}
+         BudgetProcessTypeText
+}
+where
+  Language = $session.system_language
+
+
+===========================================================================
+Where is a New I_view, which is by standard create new value help from domain 
+===========================================================================
+@AbapCatalog.viewEnhancementCategory: [#NONE]
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Budget Period Control Process Type Text'
+@Metadata.ignorePropagatedAnnotations: true
+@ObjectModel.usageType:{
+  serviceQuality: #A,
+  sizeCategory: #S,
+  dataClass: #MASTER
+}
+
+define view entity I_BdgtPerContProcessTypeText
+  as select from dd07t
+{
+      @ObjectModel.text.element: [ 'BudgetProcessTypeText' ]
+      @UI.textArrangement: #TEXT_ONLY
+  key cast(domvalue_l as psm_budget_process) as BudgetProcessType,
+
+      @Semantics.text: true
+      dd07t.ddtext                           as BudgetProcessTypeText,
+
+      dd07t.ddlanguage                       as Language
+}
+where
+      dd07t.domname    = 'PSM_BUDGET_PROCESS'
+  and dd07t.as4local   = 'A'
+  and dd07t.as4vers    = '0000'
+  and dd07t.ddlanguage = $session.system_language;
