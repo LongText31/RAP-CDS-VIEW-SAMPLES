@@ -1,0 +1,27 @@
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'BdgtPerCont Process Type Value Help'
+@Metadata.ignorePropagatedAnnotations: true
+@ObjectModel.dataCategory: #VALUE_HELP
+@ObjectModel.resultSet.sizeCategory: #XS
+@ObjectModel.usageType.dataClass: #MASTER
+@ObjectModel.usageType.serviceQuality: #B
+@ObjectModel.usageType.sizeCategory: #S
+@Search.searchable: true
+@VDM.viewType: #CONSUMPTION
+@Consumption.ranked:true
+
+define view entity C_BdgtPeriodContProcessTypeVH
+  as select from I_BudgetProcessGroup
+  association [0..*] to I_BudgetProcessGroupText as _Text on $projection.BudgetProcessGroup = _Text.BudgetProcessGroup
+{
+      @ObjectModel.text.element: ['BudgetProcessGroupText']
+      @UI.textArrangement: #TEXT_ONLY
+  key BudgetProcessGroup,
+      @Search: { defaultSearchElement: true, fuzzinessThreshold: 0.8, ranking: #LOW }
+      _Text[1:Language = $session.system_language].BudgetProcessGroupText as BudgetProcessGroupText
+}
+union select from C_BudgetProcessGroupStdVH
+{
+  key cast ( '*' as psm_budget_process )              as BudgetProcessGroup,
+      cast ('All Processes' as bdgt_process_ui_text ) as BudgetProcessGroupText
+}
